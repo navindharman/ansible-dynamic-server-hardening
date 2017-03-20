@@ -1,0 +1,7 @@
+---
+   - name: application tags
+     yum: name=libselinux-python state=present
+     #tags: 
+      # - initial 
+ 
+  

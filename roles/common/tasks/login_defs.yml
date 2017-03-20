@@ -1,0 +1,3 @@
+---
+- name: create login_defs
+  template: src='login_defs.j2' dest='/etc/login.defs' owner=root group=root mode=0444

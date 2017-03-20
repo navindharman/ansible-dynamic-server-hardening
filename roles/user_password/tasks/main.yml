@@ -1,0 +1,13 @@
+---
+#    - name: Removing user account
+#      user: name={{user_account}} state=absent remove=yes
+  
+#   - name: create new user account
+#     user: name={{user_account}} password={{user_password}}
+     
+   - name: Change password of existing user
+     user: name={{user_account}} update_password=always password={{user_password}} append=yes   
+     
+
+
+

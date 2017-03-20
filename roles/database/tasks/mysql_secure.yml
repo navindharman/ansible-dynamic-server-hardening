@@ -1,0 +1,33 @@
+---
+
+- name: Taking password from mysqld.log
+  shell: grep "temporary password" /var/log/mysqld.log | awk '{print $NF}'
+  register: temppassword
+
+- name: delete anonymous MySQL server user for {{ ansible_nodename }}
+  mysql_user: login_user=root
+              login_password= "Innoviti@1234"
+              check_implicit_admin=yes
+              user=""
+              host={{ item }}
+              state="absent"
+  with_items:
+   - "{{ ansible_nodename }}"
+   - localhost
+
+- name: Change root user password on first run
+  mysql_user: login_user=root
+              login_password= "Innoviti@1234"
+              check_implicit_admin=yes
+              name=root
+              password={{ tmppassword.stdout }}
+              priv=*.*:ALL,GRANT
+              host={{ item }}
+  with_items:
+    - "{{ ansible_nodename }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: remove the MySQL test database
+  action: mysql_db login_user=root login_password= "Innoviti@1234" db=test state=absent

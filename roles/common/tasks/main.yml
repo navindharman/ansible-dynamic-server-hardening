@@ -1,0 +1,49 @@
+---
+   - name: add the OS specific variables
+     include_vars: "{{ ansible_os_family }}.yml"
+     tags: always
+   
+   - name: install libselinux-python 
+     yum: name=libselinux-python state=present
+    
+   - name: set SELinux to disabled
+     action: selinux policy=targeted state=disabled
+
+   - name: ensure SELinux is turned off
+     action: command /usr/sbin/setenforce 0
+      
+   - include: login_defs.yml
+     tags: login_defs
+
+   - include: user_accounts.yml
+     tags: user_accounts
+  
+   - include: minimize_access.yml
+     tags: minimize_access
+ 
+   - include: pam.yml
+     tags: pam
+   
+   - include: profile.yml
+     tags: profile
+   
+   - include: securetty.yml
+     tags: securetty
+
+   - include: rhosts.yml
+     tags: rhosts
+
+   - include: yum.yml
+     when: ansible_os_family == 'RedHat' or ansible_os_family == 'CentOS'
+     tags: yum
+
+   - include: apt.yml
+     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+     tags: apt
+
+   
+
+     
+
+
+

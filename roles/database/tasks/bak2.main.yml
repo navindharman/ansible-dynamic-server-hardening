@@ -1,0 +1,110 @@
+---
+#- name: Specify MySQL root password before installing
+#  shell: name='mysql-server' question='mysql-server/root_password' value='{{mysql_root_password | quote}}' vtype='password'
+#  become: true
+
+#- name: Confirm MySQL root password before installing
+#  shell: name='mysql-server' question='mysql-server/root_password_again' value='{{mysql_root_password | quote}}' vtype='password'
+#  become: true
+  
+#- name: copying mysql.repo file
+#- copy:
+#        src: files/mysql-community-source.repo
+#        dest: /etc/yum.repos.d/mysql.repo      
+#- name: copy mysql rpm to server
+#  copy: src=files/mysql57-community-release-el6-9.noarch.rpm dest=/root/mysql57-community-release-el6-9.noarch.rpm owner=root group=root mode=755
+
+
+#- name: Install mysql local rpm in server
+#  yum: name=/root/mysql57-community-release-el6-9.noarch.rpm state=present
+ 
+         
+- name: Install Mysql package
+  yum: name={{ item }} state=installed
+  async: 1000
+  poll: 5
+  with_items:
+#   - mysql-community-*
+   - mysql-community-devel
+   - mysql-community-embedded
+   - mysql-community-embedded-devel
+#   - mysql-community-release
+   - mysql-community-server
+   - mysql-community-test
+   - mysql-community-libs
+#   - mysql-python
+   - libselinux-python
+   - libsemanage-python
+#     async: 500
+#     pool: 5
+
+#- name: Configure SELinux to start mysql on any port
+#  seboolean: name=mysql_connect_any state=true persistent=yes
+#  when: sestatus.rc != 0
+- name: Skipping MYSQL permission
+  shell: mysqld --skip-grant-tables &
+#  notify:
+#  - restart mysql
+
+- name: Create Mysql configuration file
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+  notify:
+  - restart mysql
+
+
+- name: Start Mysql Service
+  service: name=mysqld state=started enabled=yes
+
+#- name: Skipping MYSQL permission
+#  shell: mysqld --skip-grant-tables &
+
+
+- name: Taking password from mysqld.log
+  shell: grep "temporary password" /var/log/mysqld.log | awk '{print $NF}'
+  register: temppassword
+
+#- include: mysql_secure.yml
+#  tags: mysql_secure
+
+#- name: setting root password for mysql
+#  shell: >
+#   mysql -u root 
+#   ' ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY {{ login_password }};'
+
+
+
+ 
+- name: Set root user password
+  mysql_user: name="root"
+              host="localhost"
+              password= '{{ mysql_root_password }}'
+              check_implicit_admin=yes
+              login_user= '{{ mysql_user }}'
+              login_password= '{{ temppassword.stdout }}'
+              state=present
+
+- name: Create Mysql configuration file
+  template: src=new.cnf.j2 dest=/etc/my.cnf
+  notify:
+  - restart mysql
+
+
+#- name: insert iptables rule
+#  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ mysql_port }}"
+#              insertafter="^:OUTPUT " line="-A INPUT -p tcp  --dport {{ mysql_port }} -j  ACCEPT"
+#  notify: restart iptables
+
+#- name: mysql pasword
+#  shell: echo "MYSQL PASSWORD is "{{ temppassword.stdout }}" "
+
+
+#- name: Create Application Database
+#  mysql_db: name={{ dbname }} state=present
+
+#- name: Create Application DB User
+#  mysql_user: name={{ dbuser }} password={{ upassword }} priv=*.*:ALL host='%' state=present
+
+#- name: Set MySQL root password
+#  command: /usr/bin/mysql -e "alter user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'mysql_root_password';"
+#  ignore_errors: yes
+#  become: yes

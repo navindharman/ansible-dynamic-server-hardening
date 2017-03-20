@@ -1,0 +1,8 @@
+[standalone]
+192.168.1.170 ansible_ssh_pass=@dmin@Innovit! ansible_ssh_user=root
+
+[application]
+192.168.0.94 ansible_ssh_pass=@dmin@Innovit! ansible_ssh_user=root
+
+[database]
+192.168.0.95 ansible_ssh_pass=@dmin@Innovit! ansible_ssh_user=root

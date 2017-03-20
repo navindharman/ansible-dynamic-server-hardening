@@ -1,0 +1,14 @@
+---
+   - name: install libselinux-python 
+     yum: name=libselinux-python state=present
+   
+   - name: installing epel-release
+     yum: name=epel-release state=latest
+     async: 100
+     poll: 5
+   
+
+     
+
+
+

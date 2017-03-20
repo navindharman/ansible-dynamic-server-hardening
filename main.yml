@@ -1,0 +1,38 @@
+---
+# intial configuration
+- hosts: all
+  
+  roles:
+  - common
+
+  tags:
+  - initial
+
+#application
+- hosts: all
+ 
+  roles:
+  - application
+
+  tags:
+  - tomcat
+
+
+#database
+- hosts: all
+
+  roles:
+  - database
+
+  tags:
+  - mysql
+    
+#user creation
+- hosts: all
+  
+  
+  roles:
+  - credential
+
+  tags:
+  - credential
